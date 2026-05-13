@@ -3,6 +3,7 @@ package proxy
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -101,8 +102,8 @@ type SSEEvent struct {
 	Data      string
 }
 
-func (p *EngineProxy) StreamRunEvents(id string) (<-chan SSEEvent, error) {
-	req, err := http.NewRequest("GET", p.engineURL+"/runs/"+id+"/events", nil)
+func (p *EngineProxy) StreamRunEvents(ctx context.Context, id string) (<-chan SSEEvent, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", p.engineURL+"/runs/"+id+"/events", nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
@@ -129,7 +130,6 @@ func (p *EngineProxy) StreamRunEvents(id string) (<-chan SSEEvent, error) {
 		for scanner.Scan() {
 			line := scanner.Text()
 			if len(line) == 0 {
-				// Empty line = end of event
 				if eventType != "" || data != "" {
 					ch <- SSEEvent{EventType: eventType, Data: data}
 					eventType = ""

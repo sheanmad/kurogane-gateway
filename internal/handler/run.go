@@ -78,7 +78,7 @@ func (h *RunHandler) ListRuns(c *gin.Context) {
 func (h *RunHandler) StreamRunEvents(c *gin.Context) {
 	id := c.Param("id")
 
-	ch, err := h.proxy.StreamRunEvents(id)
+	ch, err := h.proxy.StreamRunEvents(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, model.ErrorResponse{
 			Error: fmt.Sprintf("engine error: %v", err),
